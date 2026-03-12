@@ -1,0 +1,38 @@
+# ============================================================
+# Credit Risk ML System — Python Dependencies
+# ============================================================
+# Install all dependencies:
+#   pip install -r requirements.txt
+#
+# For development (includes testing and linting tools):
+#   pip install -r requirements.txt -r requirements-dev.txt
+# ============================================================
+
+# ── Core ML ──────────────────────────────────────────────────
+numpy>=1.24.0
+pandas>=2.0.0
+scikit-learn>=1.3.0
+scipy>=1.11.0
+
+# ── Explainability ───────────────────────────────────────────
+shap>=0.43.0
+
+# ── Visualisation ────────────────────────────────────────────
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# ── Model Serialisation ──────────────────────────────────────
+joblib>=1.3.0          # included with scikit-learn; listed explicitly for clarity
+
+# ── API Service ──────────────────────────────────────────────
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0    # ASGI server for FastAPI (includes watchfiles for --reload)
+pydantic>=2.4.0              # data validation (FastAPI dependency)
+httpx>=0.25.0                # async HTTP client (used by FastAPI TestClient)
+
+# ── Statistics (model diagnostics) ──────────────────────────
+statsmodels>=0.14.0
+
+# ── Testing ──────────────────────────────────────────────────
+pytest>=7.4.0
+pytest-asyncio>=0.21.0       # for async FastAPI test support

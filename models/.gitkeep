@@ -1,0 +1,13 @@
+# This directory stores trained model artefacts.
+#
+# Files stored here after training:
+#   credit_model.pkl        - Champion Logistic Regression pipeline
+#   challenger_rf_model.pkl - Random Forest challenger pipeline
+#   model_card.json         - Model metadata and evaluation metrics
+#
+# Run training to generate these files:
+#   python src/train_model.py
+#
+# Note: .pkl files are excluded from version control (.gitignore).
+# In production, models are stored in a model registry
+# (MLflow, SageMaker Model Registry, or Vertex AI).
