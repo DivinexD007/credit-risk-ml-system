@@ -1,0 +1,11 @@
+.glass-surface {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    rgba(8, 15, 29, 0.72);
+  backdrop-filter: blur(18px);
+}
+
+.section-kicker {
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}

@@ -12,8 +12,9 @@ from typing import Literal, Optional, List
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, model_validator
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 from predict import CreditRiskPredictor
@@ -72,6 +73,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ],
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 class LoanApplication(BaseModel):
 
@@ -81,8 +94,6 @@ class LoanApplication(BaseModel):
     CreditScore: float = Field(..., ge=300, le=850)
 
     MonthsEmployed: float = Field(..., ge=0)
-    YearsExperience: float = Field(..., ge=0)
-
     NumCreditLines: int = Field(..., ge=0)
     InterestRate: float = Field(..., ge=0, le=100)
     LoanTerm: int = Field(..., ge=1)
@@ -94,28 +105,20 @@ class LoanApplication(BaseModel):
         "Unemployed"
     ]
 
-    Gender: Literal[
-        "Male",
-        "Female"
-    ]
-
-    Education: Literal[
-        "High School",
-        "Bachelor",
-        "Master",
-        "PhD"
-    ]
-
-    City: str
+    @model_validator(mode="after")
+    def validate_loan_to_income_ratio(self):
+        if self.LoanAmount > (self.Income * 15):
+            raise ValueError("LoanAmount cannot exceed 15x Income")
+        return self
 
 
 class PredictionResponse(BaseModel):
 
-    prediction: int
-    probability_approve: float
-    probability_default: float
-    risk_tier: str
-    decision: str
+    prediction: Literal[0, 1]
+    probability_approve: float = Field(..., ge=0.0, le=1.0)
+    probability_default: float = Field(..., ge=0.0, le=1.0)
+    risk_tier: Literal["Low", "Medium", "High"]
+    decision: Literal["Approve", "Decline"]
     threshold_used: float
     model_version: str
     timestamp: str
@@ -236,8 +239,25 @@ def predict(application: LoanApplication):
 
         result = predictor.predict(application.model_dump())
 
+        prediction_value = 1 if int(result.get("prediction", 0)) == 1 else 0
+        probability_approve = float(result.get("probability_approve", 0.0))
+        probability_approve = max(0.0, min(1.0, probability_approve))
+        probability_default = 1.0 - probability_approve
+
+        if probability_default < 0.15:
+            risk_tier = "Low"
+        elif probability_default < 0.35:
+            risk_tier = "Medium"
+        else:
+            risk_tier = "High"
+
         return PredictionResponse(
-            **result,
+            prediction=prediction_value,
+            probability_approve=probability_approve,
+            probability_default=probability_default,
+            risk_tier=risk_tier,
+            decision="Approve" if prediction_value == 1 else "Decline",
+            threshold_used=float(result.get("threshold_used", DECISION_THRESHOLD)),
             model_version="1.0.0",
             timestamp=datetime.now(UTC).isoformat(),
         )
@@ -280,10 +300,26 @@ def predict_batch(applications: List[LoanApplication]):
         for application in applications:
 
             result = predictor.predict(application.model_dump())
+            prediction_value = 1 if int(result.get("prediction", 0)) == 1 else 0
+            probability_approve = float(result.get("probability_approve", 0.0))
+            probability_approve = max(0.0, min(1.0, probability_approve))
+            probability_default = 1.0 - probability_approve
+
+            if probability_default < 0.15:
+                risk_tier = "Low"
+            elif probability_default < 0.35:
+                risk_tier = "Medium"
+            else:
+                risk_tier = "High"
 
             results.append(
                 PredictionResponse(
-                    **result,
+                    prediction=prediction_value,
+                    probability_approve=probability_approve,
+                    probability_default=probability_default,
+                    risk_tier=risk_tier,
+                    decision="Approve" if prediction_value == 1 else "Decline",
+                    threshold_used=float(result.get("threshold_used", DECISION_THRESHOLD)),
                     model_version="1.0.0",
                     timestamp=timestamp
                 )

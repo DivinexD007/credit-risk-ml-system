@@ -1,0 +1,51 @@
+@import "../styles/theme.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 217 64% 7%;
+    --foreground: 210 40% 98%;
+    --card: 218 45% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 218 45% 11%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 158 64% 52%;
+    --primary-foreground: 216 56% 10%;
+    --secondary: 218 30% 18%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 216 26% 18%;
+    --muted-foreground: 214 20% 72%;
+    --accent: 195 74% 48%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 74% 52%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 28% 23%;
+    --input: 217 28% 23%;
+    --ring: 158 64% 52%;
+    --radius: 1rem;
+    --chart-1: 158 64% 52%;
+    --chart-2: 186 92% 42%;
+    --chart-3: 41 96% 56%;
+    --chart-4: 6 93% 64%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: "Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif;
+  }
+
+  .font-heading {
+    font-family: "Trebuchet MS", "Avenir Next", "Segoe UI", sans-serif;
+  }
+}
