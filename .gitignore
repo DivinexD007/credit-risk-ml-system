@@ -55,3 +55,6 @@ monitoring/*.png
 # Logs
 *.log
 logs/
+# Next.js / frontend
+node_modules/
+.next/
